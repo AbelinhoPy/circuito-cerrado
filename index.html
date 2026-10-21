@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuito Cerrado | Juego Puzzle Electrónico</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Contenedor principal del juego -->
+  <div class="game-container">
+    
+    <!-- Encabezado y barra de estado -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="icon-bolt">⚡</span>
+        <h1>CIRCUITO CERRADO</h1>
+      </div>
+      <p class="tagline">Gira los cables para energizar la lámpara sin provocar cortocircuitos</p>
+    </header>
+
+    <!-- Barra de información (HUD) -->
+    <div class="hud">
+      <div class="hud-item level-info">
+        <span class="hud-label">Nivel</span>
+        <span id="level-display" class="hud-value">1 / 5</span>
+      </div>
+      <div class="hud-item level-title-item">
+        <span class="hud-label">Misión</span>
+        <span id="level-name" class="hud-value truncate">Primer Flujo</span>
+      </div>
+      <div class="hud-item moves-info">
+        <span class="hud-label">Movimientos</span>
+        <span id="moves-display" class="hud-value">0</span>
+      </div>
+      <div class="hud-actions">
+        <button id="btn-sound" class="btn-icon" title="Activar/Silenciar sonido" aria-label="Sonido">
+          <span id="sound-icon">🔊</span>
+        </button>
+        <button id="btn-help" class="btn-icon" title="Cómo jugar" aria-label="Ayuda">
+          <span>❓</span>
+        </button>
+        <button id="btn-reset" class="btn btn-secondary" title="Reiniciar nivel actual">
+          <span class="icon">🔄</span> Reiniciar
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner de Alerta de Cortocircuito -->
+    <div id="alert-banner" class="alert-banner hidden" role="alert">
+      <span class="alert-icon">⚠️</span>
+      <span class="alert-text"><strong>¡CORTOCIRCUITO!</strong> El polo (+) está conectado directamente al polo (−) sin pasar por la lámpara.</span>
+    </div>
+
+    <!-- Tablero de juego 5x5 -->
+    <main class="board-wrapper">
+      <div id="board" class="board" aria-label="Tablero de circuito de 5 por 5">
+        <!-- Las casillas se generan dinámicamente con JavaScript -->
+      </div>
+    </main>
+
+    <!-- Barra de estado inferior / Leyenda -->
+    <footer class="game-footer">
+      <div class="legend">
+        <div class="legend-item"><span class="dot dot-pos"></span> Positivo (+)</div>
+        <div class="legend-item"><span class="dot dot-neg"></span> Negativo (−)</div>
+        <div class="legend-item"><span class="dot dot-closed"></span> Circuito Cerrado</div>
+        <div class="legend-item"><span class="dot dot-danger"></span> Cortocircuito</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal: Nivel Completado -->
+  <div id="modal-level-win" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-icon-glow">💡</div>
+      <h2>¡CIRCUITO CERRADO!</h2>
+      <p id="win-message">La lámpara se ha encendido con éxito.</p>
+      <div class="modal-stats">
+        <div class="stat-box">
+          <span class="stat-title">Movimientos usados</span>
+          <span id="win-moves" class="stat-number">0</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-replay-level" class="btn btn-secondary">Reintentar</button>
+        <button id="btn-next-level" class="btn btn-primary">Siguiente Nivel ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Victoria Final (Fin del juego) -->
+  <div id="modal-game-win" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card victory-card">
+      <div class="modal-icon-glow trophy">🏆</div>
+      <h2>¡MAESTRO ELECTRICISTA!</h2>
+      <p>Has completado con éxito los 5 circuitos sin sobrecargar el sistema.</p>
+      
+      <div class="summary-table-wrapper">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Nivel</th>
+              <th>Nombre</th>
+              <th>Movimientos</th>
+            </tr>
+          </thead>
+          <tbody id="summary-table-body">
+            <!-- Filas generadas por JS -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="2">Total de movimientos:</th>
+              <th id="total-moves-summary">0</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-restart-game" class="btn btn-primary">🔄 Jugar de nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Instrucciones y Ayuda -->
+  <div id="modal-help" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card help-card">
+      <h2>Reglas de Circuito Cerrado</h2>
+      <div class="help-content">
+        <p><strong>Objetivo:</strong> Conectar el terminal <strong>(+)</strong> y el terminal <strong>(−)</strong> de la batería con la <strong>lámpara</strong> para que se encienda.</p>
+        <ul>
+          <li><strong>Girar piezas:</strong> Haz clic en cualquier cable para girarlo 90° en sentido horario.</li>
+          <li><strong>Piezas fijas:</strong> Tienen un borde especial y un candado 🔒; no se pueden girar.</li>
+          <li><strong>Cortocircuito:</strong> Si unes el polo (+) con el (−) directamente sin pasar por la lámpara, se disparará una alarma roja y no podrás ganar hasta corregirlo.</li>
+          <li><strong>Energización en vivo:</strong> Los cables conectados al polo (+) se tiñen de cian/azul para que veas hasta dónde llega la energía.</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-close-help" class="btn btn-primary">¡Entendido!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
